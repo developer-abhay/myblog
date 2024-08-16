@@ -1,8 +1,9 @@
 name = "server"
 compatibility_date = "2024-08-15"
 
-# [vars]
-# DATABASE_URL = `${env.DATABASE_ACCELERATE_URL}`
+[vars]
+# DATABASE_URL = "Your accelerate database url"
+# JWT_SECRET = "your jwt secret"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
