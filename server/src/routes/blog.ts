@@ -6,9 +6,15 @@ import {
   updateBlog,
 } from "../controllers/blog";
 
+import { authorize } from "../Middleware";
+
 export const blogRouter = new Hono();
 
-blogRouter.post("/", createBlog);
-blogRouter.put("/", updateBlog);
+// Authorization Middleware
+blogRouter.use("/*", authorize);
+
+// Blog Routes
 blogRouter.get("/:id", getBlog);
 blogRouter.get("/bulk", getAllBlogs);
+blogRouter.post("/", createBlog);
+blogRouter.put("/", updateBlog);
