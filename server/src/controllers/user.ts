@@ -1,3 +1,4 @@
+import { Signup } from "@developerabhay/common-myblog";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Context } from "hono";
@@ -10,7 +11,7 @@ interface Env {
 
 // SignUp Handler
 const signup = async (c: Context<{ Bindings: Env }>) => {
-  const { name, email, password } = await c.req.json();
+  const { name, email, password }: Signup = await c.req.json();
 
   if (email && password) {
     try {
