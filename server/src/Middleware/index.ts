@@ -4,7 +4,6 @@ import { verify } from "hono/jwt";
 export const authorize = async (
   c: Context<{
     Bindings: {
-      DATABASE_URL: string;
       JWT_SECRET: string;
     };
     Variables: {

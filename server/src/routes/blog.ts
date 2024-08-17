@@ -14,7 +14,7 @@ export const blogRouter = new Hono();
 blogRouter.use("/*", authorize);
 
 // Blog Routes
-blogRouter.get("/:id", getBlog);
-blogRouter.get("/bulk", getAllBlogs);
 blogRouter.post("/", createBlog);
 blogRouter.put("/", updateBlog);
+blogRouter.get("/bulk", getAllBlogs);
+blogRouter.get("/:id", getBlog);
