@@ -1,4 +1,4 @@
-import { Signup } from "@developerabhay/common-myblog";
+import { signinInput, signupInput } from "@developerabhay/common-myblog";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Context } from "hono";
@@ -11,44 +11,51 @@ interface Env {
 
 // SignUp Handler
 const signup = async (c: Context<{ Bindings: Env }>) => {
-  const { name, email, password }: Signup = await c.req.json();
+  const body = await c.req.json();
+  const { success } = signupInput.safeParse(body);
 
-  if (email && password) {
-    try {
-      const prisma = new PrismaClient({
-        datasourceUrl: c.env?.DATABASE_URL,
-      }).$extends(withAccelerate());
+  if (!success) {
+    return c.json({ message: "Enter valid Values" });
+  }
 
-      const user = await prisma.user.create({
-        data: {
-          name: name || null,
-          email,
-          password,
-        },
-      });
+  try {
+    const prisma = new PrismaClient({
+      datasourceUrl: c.env?.DATABASE_URL,
+    }).$extends(withAccelerate());
 
-      const token = await sign({ id: user.id }, c.env.JWT_SECRET);
-      return c.json({ token });
-    } catch (e: unknown) {
-      return c.json({ error: "Invalid Entries" }, 403);
-    }
-  } else {
-    return c.json({ message: "Enter valid email and password" });
+    const user = await prisma.user.create({
+      data: {
+        name: body.name,
+        email: body.email,
+        password: body.password,
+      },
+    });
+
+    const token = await sign({ id: user.id }, c.env.JWT_SECRET);
+    return c.json({ token });
+  } catch (e: unknown) {
+    return c.json({ error: "Internal Server Error" });
   }
 };
 
 // Signin Route
 const signin = async (c: Context<{ Bindings: Env }>) => {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env?.DATABASE_URL,
-  }).$extends(withAccelerate());
+  const body = await c.req.json();
+  const { success } = signinInput.safeParse(body);
 
-  const { email, password } = await c.req.json();
+  if (!success) {
+    return c.json({ message: "Invalid Inputs" });
+  }
+
   try {
+    const prisma = new PrismaClient({
+      datasourceUrl: c.env?.DATABASE_URL,
+    }).$extends(withAccelerate());
+
     const user = await prisma.user.findUnique({
       where: {
-        email,
-        password,
+        email: body.email,
+        password: body.password,
       },
     });
 

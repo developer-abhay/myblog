@@ -1,3 +1,7 @@
+import {
+  createBlogSchema,
+  updateBlogSchema,
+} from "@developerabhay/common-myblog";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Context } from "hono";
@@ -10,7 +14,13 @@ type CustomContext = Context<{
 // Create New Blog route
 const createBlog = async (c: CustomContext) => {
   const userId = c.get("userId");
-  const { title, content } = await c.req.json();
+  const body = await c.req.json();
+
+  const { success } = createBlogSchema.safeParse(body);
+
+  if (!success) {
+    return c.json({ error: "Enter valid entries" });
+  }
 
   try {
     const prisma = new PrismaClient({
@@ -19,8 +29,8 @@ const createBlog = async (c: CustomContext) => {
 
     const post = await prisma.post.create({
       data: {
-        content,
-        title,
+        content: body.content,
+        title: body.title,
         authorId: userId,
       },
     });
@@ -33,8 +43,14 @@ const createBlog = async (c: CustomContext) => {
 
 // Update New Blog Route
 const updateBlog = async (c: CustomContext) => {
-  const { postId, title, content } = await c.req.json();
   const userId = c.get("userId");
+  const body = await c.req.json();
+
+  const { success } = updateBlogSchema.safeParse(body);
+
+  if (!success) {
+    return c.json({ error: "Enter valid entries" });
+  }
 
   try {
     const prisma = new PrismaClient({
@@ -43,18 +59,18 @@ const updateBlog = async (c: CustomContext) => {
 
     const post = await prisma.post.update({
       where: {
-        id: postId,
+        id: body.postId,
         authorId: userId,
       },
       data: {
-        content,
-        title,
+        content: body.content,
+        title: body.title,
       },
     });
 
     return c.text("Post Updated");
   } catch (error) {
-    return c.json({ message: "Invalid Inputs" });
+    return c.json({ message: "Could not update post" });
   }
 };
 
